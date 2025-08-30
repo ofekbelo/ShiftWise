@@ -1,0 +1,37 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: shiftwise_postgres
+    environment:
+      POSTGRES_USER: swuser
+      POSTGRES_PASSWORD: swpass
+      POSTGRES_DB: shiftwise
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U swuser -d shiftwise"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  pgadmin:
+    image: dpage/pgadmin4:8
+    container_name: shiftwise_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@shiftwise.dev
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "8081:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - pgadmindata:/var/lib/pgadmin
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  pgadmindata:
